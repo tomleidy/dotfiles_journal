@@ -28,6 +28,15 @@ if [ "$(which_os)" = "macOS" ]; then
     if [ ! -e "$path_and_file" ]; then
         echo $title >> "$path_and_file"
         echo "#MorningPages" >> "$path_and_file"
+        if [ -e "$questions" ]; then
+            questions="${JOURNAL_DIR}/questions.txt"
+            word_count1=$(wc -w < "$path_and_file")
+            word_count2=$(wc -w < "$questions")
+            total_word_count=$((word_count1 + word_count2 + 753))
+            echo "Goal WC:$total_word_count" >> "$path_and_file"
+            echo >> "$path_and_file"
+            cat "$questions" >> "$path_and_file"
+        fi
     fi
     open -a "iA Writer" "$path_and_file"
 fi
