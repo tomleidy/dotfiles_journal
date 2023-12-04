@@ -34,7 +34,7 @@ if [ "$(which_os)" = "macOS" ]; then
         if [ -e "$questions" ]; then
             echo "$questions"
             word_count1=$(wc -w < "$path_and_file")
-            word_count2=$(wc -w < "$questions")
+            word_count2=$(cat "$questions" | sed s/^-// |  wc -w)
             total_word_count=$((word_count1 + word_count2 + 753))
             echo >> "$path_and_file"
             echo >> "$path_and_file"
