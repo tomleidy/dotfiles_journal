@@ -24,38 +24,51 @@ filename=${title}.txt
 cur_os=$(which_os)
 
 
-# Determine paths based on OS
-if [ "$cur_os" = "macOS" ]; then
-    JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
-elif [ "$cur_os" = "Windows" ]; then
-    JOURNAL_DIR=~/iCloudDrive/27N4MQEA55~pro~writer/Morning\ Pages
-fi
 morning_page_file="${JOURNAL_DIR}/${filename}"
 questions_file="${JOURNAL_DIR}/questions.txt"
 
-# Create today's entry if it doesn't exist
-if [ ! -e "$morning_page_file" ]; then
-    echo $title >> "$morning_page_file"
-    echo "#MorningPages" >> "$morning_page_file"
-    echo >> "$morning_page_file"
 
-    # Add questions if they exist
-    if [ -e "$questions_file" ]; then
-        echo "$questions_file"
-        word_count1=$(wc -w < "$morning_page_file")
-        word_count2=$(cat "$questions_file" | sed s/^-// | wc -w)
-        total_word_count=$((word_count1 + word_count2 + 753))
-        echo >> "$morning_page_file"
-        echo >> "$morning_page_file"
-        echo "Goal WC: $total_word_count" >> "$morning_page_file"
-        cat "$questions_file" >> "$morning_page_file"
-        sleep 1
+update_goal_wordcount() {
+    # pass either MORNINGWORDCOUNT or EVENINGWORDCOUNT
+    replace_string="$1"
+    if [ ! -z "$replace_string" ]; then
+        replacement_count=$(grep "$morning_page_file" -e "$replace_string" | wc -l)
+        if [ "$replacement_count" -gt 0 ]; then
+            current_wordcount=$(sed -e s/-// -e s/—//g -e s/\\//\ /g "$morning_page_file" | wc -w)
+            new_wordcount=$((current_wordcount + 750))
+            sed -i s/${replace_string}/${new_wordcount}/ "$morning_page_file"
+        fi
     fi
-fi
+}
 
-# Execute iA Writer based on OS
+create_morningpages() {
+    # Create today's entry if it doesn't exist
+    if [ ! -e "$morning_page_file" ]; then
+        echo $title >> "$morning_page_file"
+        echo "#MorningPages" >> "$morning_page_file"
+        echo >> "$morning_page_file"
+        # Add questions if they exist
+        if [ -e "$questions_file" ]; then
+            echo >> "$morning_page_file"
+            echo >> "$morning_page_file"
+            cat "$questions_file" >> "$morning_page_file"
+            update_goal_wordcount MORNINGWORDCOUNT
+            sleep 1
+        fi
+    else
+        if [ "$(date +%H)" -gt 18 ]; then
+            update_goal_wordcount EVENINGWORDCOUNT
+        fi
+    fi
+}
+
+
 if [ "$cur_os" = "macOS" ]; then
+    JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
+    create_morningpages
     open -a "iA Writer" "$morning_page_file"
 elif [ "$cur_os" = "Windows" ]; then
+    JOURNAL_DIR=~/iCloudDrive/27N4MQEA55~pro~writer/Morning\ Pages
+    create_morningpages
     '/c/Program Files/iA Writer/iAWriter.exe' "$morning_page_file" &
 fi
