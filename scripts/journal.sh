@@ -24,8 +24,7 @@ filename=${title}.txt
 cur_os=$(which_os)
 
 
-morning_page_file="${JOURNAL_DIR}/${filename}"
-questions_file="${JOURNAL_DIR}/questions.txt"
+
 
 
 update_goal_wordcount() {
@@ -43,7 +42,10 @@ update_goal_wordcount() {
 
 create_morningpages() {
     # Create today's entry if it doesn't exist
+    morning_page_file="${JOURNAL_DIR}/${filename}"
+    questions_file="${JOURNAL_DIR}/questions.txt"
     if [ ! -e "$morning_page_file" ]; then
+    echo "$morning_page_file"
         echo $title >> "$morning_page_file"
         echo "#MorningPages" >> "$morning_page_file"
         echo >> "$morning_page_file"
