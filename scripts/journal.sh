@@ -30,12 +30,19 @@ cur_os=$(which_os)
 update_goal_wordcount() {
     # pass either MORNINGWORDCOUNT or EVENINGWORDCOUNT
     replace_string="$1"
+    echo $replace_string
     if [ ! -z "$replace_string" ]; then
         replacement_count=$(grep "$morning_page_file" -e "$replace_string" | wc -l)
         if [ "$replacement_count" -gt 0 ]; then
             current_wordcount=$(sed -e s/-// -e s/—//g -e s/\\//\ /g "$morning_page_file" | wc -w)
             new_wordcount=$((current_wordcount + 750))
-            sed -i s/${replace_string}/${new_wordcount}/ "$morning_page_file"
+
+            sed -i $OS_ARGUMENT -e "s/${replace_string}/${new_wordcount}/" "$morning_page_file"
+            temp_file="${morning_page_file}${OS_ARGUMENT}"
+            if [ -e "$temp_file" ]; then
+                # to deal with macOS sed / OS_ARGUMENT shenanigans
+                rm "$temp_file"
+            fi
         fi
     fi
 }
@@ -67,6 +74,7 @@ create_morningpages() {
 
 if [ "$cur_os" = "macOS" ]; then
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
+    OS_ARGUMENT=".tmp"
     create_morningpages
     open -a "iA Writer" "$morning_page_file"
 elif [ "$cur_os" = "Windows" ]; then
