@@ -23,10 +23,6 @@ title="${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}
 filename=${title}.txt
 cur_os=$(which_os)
 
-
-
-
-
 update_goal_wordcount() {
     # pass either MORNINGWORDCOUNT or EVENINGWORDCOUNT
     replace_string="$1"
@@ -34,7 +30,7 @@ update_goal_wordcount() {
     if [ ! -z "$replace_string" ]; then
         replacement_count=$(grep "$morning_page_file" -e "$replace_string" | wc -l)
         if [ "$replacement_count" -gt 0 ]; then
-            current_wordcount=$(sed -e s/-// -e s/—//g -e s/\\//\ /g "$morning_page_file" | wc -w)
+            current_wordcount=$(sed -e s/-//g -e s/—//g -e s/\\//\ /g -e s/\&//g "$morning_page_file" | wc -w)
             new_wordcount=$((current_wordcount + 750))
 
             sed -i $OS_ARGUMENT -e "s/${replace_string}/${new_wordcount}/" "$morning_page_file"
@@ -70,7 +66,6 @@ create_morningpages() {
         fi
     fi
 }
-
 
 if [ "$cur_os" = "macOS" ]; then
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
