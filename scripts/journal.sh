@@ -61,7 +61,7 @@ create_morningpages() {
             sleep 1
         fi
     else
-        if [ "$(date +%H)" -gt 18 ]; then
+        if [ "$(date +%H)" -ge 18 ]; then
             update_goal_wordcount EVENINGWORDCOUNT
         fi
     fi
