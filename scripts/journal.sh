@@ -63,7 +63,7 @@ update_goal_wordcount() {
             temp_file="${morning_page_file}${OS_ARGUMENT}"
             if [ -e "$temp_file" ]; then
                 # to deal with macOS sed / OS_ARGUMENT shenanigans
-                rm "$temp_file"
+                echo rm "$temp_file"
             fi
         fi
     fi
