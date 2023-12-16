@@ -22,6 +22,17 @@ esac
 title="${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
 filename=${title}.txt
 
+fix_questions_txt() {
+    unspaced_endings=$(grep "$questions_file" -e ":$" -e "?$" | wc -l | tr -d '[:blank:]')
+    if [ "$unspaced_endings" -gt 0 ]; then
+        sed -i "$OS_ARGUMENT" -e 's/\([:?]\)$/\1 /' "$questions_file"
+        temp_file="${questions_file}${OS_ARGUMENT}"
+        if [ -e "$temp_file" ]; then
+            # to deal with macOS sed / OS_ARGUMENT shenanigans
+            rm "$temp_file"
+        fi
+    fi
+}
 
 get_wordcount_from_file() {
     # replace characters with space
@@ -62,6 +73,7 @@ create_morningpages() {
     # Create today's entry if it doesn't exist
     morning_page_file="${JOURNAL_DIR}/${filename}"
     questions_file="${JOURNAL_DIR}/questions.txt"
+    fix_questions_txt
     if [ ! -e "$morning_page_file" ]; then
         echo "$morning_page_file"
         echo $title >> "$morning_page_file"
