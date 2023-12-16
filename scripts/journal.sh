@@ -1,6 +1,6 @@
 #!/bin/bash
 source ~/.dot/helper/which_os
-echo $(which_os)
+
 # Get today's date components
 year=$(date +%Y)
 month=$(date +%B)
