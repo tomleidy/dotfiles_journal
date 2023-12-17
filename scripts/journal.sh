@@ -25,12 +25,9 @@ filename=${title}.txt
 fix_questions_txt() {
     unspaced_endings=$(grep "$questions_file" -e ":$" -e "?$" | wc -l | tr -d '[:blank:]')
     if [ "$unspaced_endings" -gt 0 ]; then
-        sed -i "$OS_ARGUMENT" -e 's/\([:?]\)$/\1 /' "$questions_file"
-        temp_file="${questions_file}${OS_ARGUMENT}"
-        if [ -e "$temp_file" ]; then
-            # to deal with macOS sed / OS_ARGUMENT shenanigans
-            rm "$temp_file"
-        fi
+        temp_file="${questions_file}.tmp"
+        sed -e 's/\([:?]\)$/\1 /' "$questions_file" > "$temp_file"
+        mv "$temp_file" "$questions_file"
     fi
 }
 
