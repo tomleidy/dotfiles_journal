@@ -23,10 +23,10 @@ title="${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}
 filename=${title}.txt
 
 fix_questions_txt() {
-    unspaced_endings=$(grep "$questions_file" -e ":$" -e "?$" | wc -l | tr -d '[:blank:]')
+    unspaced_endings=$(grep "$questions_file" -e ":$" | wc -l | tr -d '[:blank:]')
     if [ "$unspaced_endings" -gt 0 ]; then
         temp_file="${questions_file}.tmp"
-        sed -e 's/\([:?]\)$/\1 /' "$questions_file" > "$temp_file"
+        sed -e 's/\([:]\)$/\1 /' "$questions_file" > "$temp_file"
         mv "$temp_file" "$questions_file"
     fi
 }
