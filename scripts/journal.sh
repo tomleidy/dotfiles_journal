@@ -34,13 +34,13 @@ fix_questions_txt() {
 get_wordcount_from_file() {
     # replace characters with space
     local non_word_strip1=$(sed -e 's/[_:\>\<\/]/ /g' -e 's/[A-Za-z]\/[A-Za-z]/ /g' "$morning_page_file")
-
     # remove characters
     local non_word_strip2=$(echo $non_word_strip1 | sed -e 's/[&—-]//g' )
     # remove preceding spaces
     local non_word_strip3=$(echo $non_word_strip2 | sed -e 's/ […\?]/…/g')
-
-    local non_word_strip5="$non_word_strip3"
+    # remove period between two letters/numbers
+    local non_word_strip4=$(echo $non_word_strip3 | sed -e 's/\([[:alnum:]]\)\.\([[:alnum:]]\)/\1 \2/g')
+    local non_word_strip5="$non_word_strip4"
     local wordcount=$(echo $non_word_strip5 | wc -w | tr -d '[:blank:]')
 
     echo $wordcount
