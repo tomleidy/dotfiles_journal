@@ -56,12 +56,9 @@ update_goal_wordcount() {
             current_wordcount=$(get_wordcount_from_file)
             new_wordcount=$((current_wordcount + 750))
             echo "Replacing \"$replace_string\" with \"$new_wordcount\""
-            sed -i $OS_ARGUMENT -e "s/${replace_string}/${new_wordcount}/" "$morning_page_file"
-            temp_file="${morning_page_file}${OS_ARGUMENT}"
-            if [ -e "$temp_file" ]; then
-                # to deal with macOS sed / OS_ARGUMENT shenanigans
-                echo rm "$temp_file"
-            fi
+            temp_file="${morning_page_file}.tmp"
+            sed -e "s/${replace_string}/${new_wordcount}/" "$morning_page_file" > "$temp_file"
+            mv -f "$temp_file" "$morning_page_file"
         fi
     fi
 }
@@ -96,7 +93,6 @@ filename=${title}.txt
 cur_os=$(which_os)
 if [ "$cur_os" = "macOS" ]; then
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
-    OS_ARGUMENT=".tmp"
     create_morningpages
     open -a "iA Writer" "$morning_page_file"
 elif [ "$cur_os" = "Windows" ]; then
