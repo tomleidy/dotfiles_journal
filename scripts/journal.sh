@@ -1,5 +1,6 @@
 #!/bin/bash
 source ~/.dot/helper/which_os
+source ~/.dot/helper/get_wordcount.sh
 
 # Get today's date components
 year=$(date +%Y)
@@ -31,21 +32,6 @@ fix_questions_txt() {
     fi
 }
 
-get_wordcount_from_file() {
-    # replace characters with space
-    local non_word_strip1=$(sed -e 's/[_:\>\<\/]/ /g' -e 's/[A-Za-z]\/[A-Za-z]/ /g' "$morning_page_file")
-    # remove characters
-    local non_word_strip2=$(echo $non_word_strip1 | sed -e 's/[&—-]//g' )
-    # remove preceding spaces
-    local non_word_strip3=$(echo $non_word_strip2 | sed -e 's/ […\?]/…/g')
-    # remove period between two letters/numbers
-    local non_word_strip4=$(echo $non_word_strip3 | sed -e 's/\([[:alnum:]]\)\.\([[:alnum:]]\)/\1 \2/g')
-    local non_word_strip5="$non_word_strip4"
-    local wordcount=$(echo $non_word_strip5 | wc -w | tr -d '[:blank:]')
-
-    echo $wordcount
-}
-
 update_goal_wordcount() {
     # pass either MORNINGWORDCOUNT or EVENINGWORDCOUNT
     replace_string="$1"
@@ -53,7 +39,7 @@ update_goal_wordcount() {
     if [ ! -z "$replace_string" ]; then
         replacement_count=$(grep "$morning_page_file" -e "$replace_string" | wc -l)
         if [ "$replacement_count" -gt 0 ]; then
-            current_wordcount=$(get_wordcount_from_file)
+            current_wordcount=$(get_approximate_ia_writer_wordcount_from_file "$morning_page_file")
             new_wordcount=$((current_wordcount + 750))
             echo "Replacing \"$replace_string\" with \"$new_wordcount\""
             temp_file="${morning_page_file}.tmp"
