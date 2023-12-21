@@ -8,3 +8,7 @@ get_approximate_ia_writer_wordcount_from_file() {
     local wordcount=$(echo $non_word_strip1 | wc -w | tr -d '[:blank:]')
     echo $wordcount
 }
+
+# TODO: determine the difference between iA Writer word count on Windows and macOS.
+# The above correlates to macOS (most of the time?), and missed 10 words on on today's base word count
+# after adding questions.txt.
