@@ -8,6 +8,9 @@ month=$(date +%B)
 day=$(date +%d)
 weekday=$(date +%A)
 
+# TODO: Windows for 8 weeks ago? date -d '8 weeks ago' +...
+# TODO: macOS for 8 weeks ago: date -v-8w +...
+# TODO: create function to open journal entry from 8 weeks previously for perusal after
 # Remove leading zero from the day if present
 day=$(echo $day | sed 's/^0*//')
 
@@ -19,11 +22,9 @@ case $day in
     *)           ordinal="th" ;;
 esac
 
-# Construct the filename
-title="${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
-filename=${title}.txt
 
 fix_questions_txt() {
+    # Add spaces to lines expecting answers on the same line. VS Code will remove them.
     unspaced_endings=$(grep "$questions_file" -e ":$" | wc -l | tr -d '[:blank:]')
     if [ "$unspaced_endings" -gt 0 ]; then
         temp_file="${questions_file}.tmp"
@@ -33,7 +34,7 @@ fix_questions_txt() {
 }
 
 update_goal_wordcount() {
-    # pass either MORNINGWORDCOUNT or EVENINGWORDCOUNT
+    # pass in either MORNINGWORDCOUNT or EVENINGWORDCOUNT, replace it in today's entry with goal word count
     replace_string="$1"
 
     if [ ! -z "$replace_string" ]; then
@@ -74,6 +75,7 @@ create_morningpages() {
     fi
 }
 
+# Construct the filename
 title="${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
 filename=${title}.txt
 cur_os=$(which_os)
