@@ -9,19 +9,35 @@ get_title_today() {
     local day=$(date +%d)
     local weekday=$(date +%A)
 
-# TODO: Windows for 8 weeks ago? date -d '8 weeks ago' +...
-# TODO: macOS for 8 weeks ago: date -v-8w +...
-# TODO: create function to open journal entry from 8 weeks previously for perusal after
-# Remove leading zero from the day if present
+    # Remove leading zero from the day if present
     local day=$(echo $day | sed 's/^0*//')
-# Determine the ordinal suffix
-case $day in
-    1 | 21 | 31) ordinal="st" ;;
-    2 | 22)      ordinal="nd" ;;
-    3 | 23)      ordinal="rd" ;;
-    *)           ordinal="th" ;;
-esac
+    # Determine the ordinal suffix
+    case $day in
+        1 | 21 | 31) ordinal="st" ;;
+        2 | 22)      ordinal="nd" ;;
+        3 | 23)      ordinal="rd" ;;
+        *)           ordinal="th" ;;
+    esac
     echo "${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
+}
+
+get_filename_8_weeks_ago() {
+    if [ "$OS" = "macOS" ]; then
+        local year=$(date -v-8w +%Y)
+        local month=$(date -v-8w +%B)
+        local day=$(date -v-8w +%d)
+        local weekday=$(date -v-8w +%A)
+        local day=$(echo $day | sed 's/^0*//')
+        case $day in
+            1 | 21 | 31) local ordinal="st" ;;
+            2 | 22)      local ordinal="nd" ;;
+            3 | 23)      local ordinal="rd" ;;
+            *)           local ordinal="th" ;;
+        esac
+        echo "${year}$(date -v-8w +%m)$(date -v-8w +%d) ${weekday} the ${day}${ordinal} of ${month}.txt"
+    fi
+    # TODO: Windows for 8 weeks ago? date -d '8 weeks ago' +...
+}
 
 fix_questions_txt() {
     # Add spaces to lines expecting answers on the same line. VS Code will remove them.
@@ -75,14 +91,22 @@ create_morningpages() {
     fi
 }
 
+
+
+
 # Construct the filename
 title="$(get_title_today)"
 filename="${title}.txt"
+review_filename="$(get_filename_8_weeks_ago)"
 cur_os=$(which_os)
 if [ "$cur_os" = "macOS" ]; then
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
     create_morningpages
     open -a "iA Writer" "$morning_page_file"
+    if [ ! -z "$review_filename" ]; then
+        review_pathname="${JOURNAL_DIR}/${review_filename}"
+        less "$review_pathname"
+    fi
 elif [ "$cur_os" = "Windows" ]; then
     JOURNAL_DIR=~/iCloudDrive/27N4MQEA55~pro~writer/Morning\ Pages
     create_morningpages
