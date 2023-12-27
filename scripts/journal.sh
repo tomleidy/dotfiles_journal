@@ -3,17 +3,17 @@ source ~/.dot/helper/which_os
 source ~/.dot/helper/get_wordcount.sh
 
 # Get today's date components
-year=$(date +%Y)
-month=$(date +%B)
-day=$(date +%d)
-weekday=$(date +%A)
+get_title_today() {
+    local year=$(date +%Y)
+    local month=$(date +%B)
+    local day=$(date +%d)
+    local weekday=$(date +%A)
 
 # TODO: Windows for 8 weeks ago? date -d '8 weeks ago' +...
 # TODO: macOS for 8 weeks ago: date -v-8w +...
 # TODO: create function to open journal entry from 8 weeks previously for perusal after
 # Remove leading zero from the day if present
-day=$(echo $day | sed 's/^0*//')
-
+    local day=$(echo $day | sed 's/^0*//')
 # Determine the ordinal suffix
 case $day in
     1 | 21 | 31) ordinal="st" ;;
@@ -21,7 +21,7 @@ case $day in
     3 | 23)      ordinal="rd" ;;
     *)           ordinal="th" ;;
 esac
-
+    echo "${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
 
 fix_questions_txt() {
     # Add spaces to lines expecting answers on the same line. VS Code will remove them.
@@ -56,7 +56,7 @@ create_morningpages() {
     questions_file="${JOURNAL_DIR}/questions.txt"
     fix_questions_txt
     if [ ! -e "$morning_page_file" ]; then
-        echo "$morning_page_file"
+        echo "Preparing $morning_page_file"
         echo $title >> "$morning_page_file"
         echo "#MorningPages" >> "$morning_page_file"
         echo >> "$morning_page_file"
@@ -76,8 +76,8 @@ create_morningpages() {
 }
 
 # Construct the filename
-title="${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
-filename=${title}.txt
+title="$(get_title_today)"
+filename="${title}.txt"
 cur_os=$(which_os)
 if [ "$cur_os" = "macOS" ]; then
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
