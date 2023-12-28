@@ -84,6 +84,11 @@ create_morningpages() {
             update_goal_wordcount MORNINGWORDCOUNT
             sleep 1
         fi
+        # Open morning pages from 8 weeks ago if they exist
+        local review_filename="$(get_filename_8_weeks_ago)"
+        review_pathname="${JOURNAL_DIR}/${review_filename}"
+
+
     else
         if [ "$(date +%H)" -ge 18 ]; then
             update_goal_wordcount EVENINGWORDCOUNT
@@ -92,19 +97,16 @@ create_morningpages() {
 }
 
 
-
-
 # Construct the filename
 title="$(get_title_today)"
 filename="${title}.txt"
-review_filename="$(get_filename_8_weeks_ago)"
+
 cur_os=$(which_os)
 if [ "$cur_os" = "macOS" ]; then
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
     create_morningpages
     open -a "iA Writer" "$morning_page_file"
-    if [ ! -z "$review_filename" ]; then
-        review_pathname="${JOURNAL_DIR}/${review_filename}"
+    if [ -e "$review_pathname" ]; then
         less "$review_pathname"
     fi
 elif [ "$cur_os" = "Windows" ]; then
