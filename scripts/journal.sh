@@ -123,7 +123,7 @@ create_morningpages() {
         add_questions_to_morningpages
         update_goal_wordcount MORNINGWORDCOUNT
     fi
-    if [ -e "$morning_page_file" ] && [ "$(date +%H)" -ge 18 ]; then
+    if [ -e "$morning_page_file" ] && [ "$(date +%H)" -ge "$EVENING_HOUR_STARTS" ]; then
         update_goal_wordcount EVENINGWORDCOUNT
     fi
     sleep 1
