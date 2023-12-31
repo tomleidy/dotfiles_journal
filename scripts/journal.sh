@@ -69,6 +69,15 @@ get_filename_8_weeks_ago() {
     # TODO: Windows for 8 weeks ago? date -d '8 weeks ago' +...
 }
 
+open_8_weeks_ago_less() {
+    # Open morning pages from 8 weeks ago if they exist
+    local review_filename="$(get_filename_8_weeks_ago)"
+    review_pathname="${JOURNAL_DIR}/${review_filename}"
+    if [ -e "$review_pathname" ]; then
+        less "$review_pathname"
+    fi
+}
+
 fix_questions_txt() {
     # Add spaces to lines expecting answers on the same line. VS Code will remove them.
     unspaced_endings=$(grep "$questions_file" -e ":$" | wc -l | tr -d '[:blank:]')
@@ -82,7 +91,6 @@ fix_questions_txt() {
 update_goal_wordcount() {
     # pass in either MORNINGWORDCOUNT or EVENINGWORDCOUNT, replace it in today's entry with goal word count
     replace_string="$1"
-
     if [ ! -z "$replace_string" ]; then
         replacement_count=$(grep "$morning_page_file" -e "$replace_string" | wc -l)
         if [ "$replacement_count" -gt 0 ]; then
@@ -96,51 +104,58 @@ update_goal_wordcount() {
     fi
 }
 
-create_morningpages() {
-    # Create today's entry if it doesn't exist
-    morning_page_file="${JOURNAL_DIR}/${filename}"
-    questions_file="${JOURNAL_DIR}/questions.txt"
-    fix_questions_txt
-    if [ ! -e "$morning_page_file" ]; then
-        echo "Preparing $morning_page_file"
-        echo $title >> "$morning_page_file"
-        echo "#MorningPages" >> "$morning_page_file"
+add_questions_to_morningpages() {
+    if [ -e "$questions_file" ]; then
         echo >> "$morning_page_file"
-        # Add questions if they exist
-        if [ -e "$questions_file" ]; then
-            echo >> "$morning_page_file"
-            echo >> "$morning_page_file"
-            cat "$questions_file" >> "$morning_page_file"
-            update_goal_wordcount MORNINGWORDCOUNT
-            sleep 1
-        fi
-        # Open morning pages from 8 weeks ago if they exist
-        local review_filename="$(get_filename_8_weeks_ago)"
-        review_pathname="${JOURNAL_DIR}/${review_filename}"
-
-
-    else
-        if [ "$(date +%H)" -ge 18 ]; then
-            update_goal_wordcount EVENINGWORDCOUNT
-        fi
+        echo >> "$morning_page_file"
+        cat "$questions_file" >> "$morning_page_file"
     fi
 }
-
-
-# Construct the filename
-title="$(get_title_today)"
-filename="${title}.txt"
-
-cur_os=$(which_os)
-if [ "$cur_os" = "macOS" ]; then
-    JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
-    create_morningpages
-    open -a "iA Writer" "$morning_page_file"
-    if [ -e "$review_pathname" ]; then
-        less "$review_pathname"
+add_date_and_title_to_morningpages() {
+    echo "Preparing $morning_page_file"
+    echo $title >> "$morning_page_file"
+    echo "#MorningPages" >> "$morning_page_file"
+    echo >> "$morning_page_file"
+}
+create_morningpages() {
+    if [ ! -e "$morning_page_file" ]; then
+        add_date_and_title_to_morningpages
+        add_questions_to_morningpages
+        update_goal_wordcount MORNINGWORDCOUNT
     fi
-elif [ "$cur_os" = "Windows" ]; then
+    if [ -e "$morning_page_file" ] && [ "$(date +%H)" -ge 18 ]; then
+        update_goal_wordcount EVENINGWORDCOUNT
+    fi
+    sleep 1
+}
+
+set_today_file_and_path() {
+    # TODO: reduce the number of variables we need to set external to this function
+    title="$(get_title_today)"
+    filename="${title}.txt"
+    morning_page_file="${JOURNAL_DIR}/${filename}"
+    questions_file="${JOURNAL_DIR}/questions.txt"
+}
+
+open_ia_writer_mac() {
+    open -a "iA Writer" "$morning_page_file"
+}
+open_ia_writer_win() {
+    '/c/Program Files/iA Writer/iAWriter.exe' "$morning_page_file" &
+}
+
+OS=$(which_os)
+if [ "$OS" = "macOS" ]; then
+    # TODO: find better place for JOURNAL_DIR determination?
+    JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
+    set_today_file_and_path
+    fix_questions_txt
+    create_morningpages
+    open_ia_writer_mac
+    open_8_weeks_ago_less
+
+elif [ "$OS" = "Windows" ]; then
     JOURNAL_DIR=~/iCloudDrive/27N4MQEA55~pro~writer/Morning\ Pages
     create_morningpages
-    '/c/Program Files/iA Writer/iAWriter.exe' "$morning_page_file" &
+    open_ia_writer_win
 fi
