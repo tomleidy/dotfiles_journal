@@ -72,6 +72,10 @@ get_filename_8_weeks_ago() {
 open_8_weeks_ago_less() {
     # Open morning pages from 8 weeks ago if they exist
     local review_filename="$(get_filename_8_weeks_ago)"
+    local year=$(date -v-8w +%Y)
+    if [ "$year" != "$(date +%Y)" ]; then
+        review_filename="${year}/${review_filename}"
+    fi
     review_pathname="${JOURNAL_DIR}/${review_filename}"
     if [ -e "$review_pathname" ]; then
         less "$review_pathname"
