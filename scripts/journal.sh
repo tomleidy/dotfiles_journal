@@ -51,6 +51,26 @@ get_title_today() {
     echo "${year}$(date +%m)$(date +%d) ${weekday} the ${day}${ordinal} of ${month}"
 }
 
+is_gnu_date() {
+    if date -d '1 day ago' &>/dev/null; then
+        echo true
+    else
+        echo false
+    fi
+}
+
+is_bsd_date() {
+    if date -v-1d &>/dev/null; then
+        echo true
+    else
+        echo false
+    fi
+}
+
+bsd_date=$(is_bsd_date)
+gnu_date=$(is_gnu_date)
+
+
 get_filename_8_weeks_ago() {
     if [ "$OS" = "macOS" ]; then
         local year=$(date -v-8w +%Y)
