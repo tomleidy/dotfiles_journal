@@ -1,0 +1,2 @@
+alias journal='sh ~/.dot/scripts/journal.sh'
+
