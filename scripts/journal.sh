@@ -72,31 +72,53 @@ gnu_date=$(is_gnu_date)
 
 
 get_filename_8_weeks_ago() {
-    if [ "$OS" = "macOS" ]; then
-        local year=$(date -v-8w +%Y)
-        local month=$(date -v-8w +%B)
-        local day=$(date -v-8w +%d)
-        local weekday=$(date -v-8w +%A)
-        local day=$(echo $day | sed 's/^0*//')
-        case $day in
-            1 | 21 | 31) local ordinal="st" ;;
-            2 | 22)      local ordinal="nd" ;;
-            3 | 23)      local ordinal="rd" ;;
-            *)           local ordinal="th" ;;
-        esac
-        echo "${year}$(date -v-8w +%m)$(date -v-8w +%d) ${weekday} the ${day}${ordinal} of ${month}.txt"
+
+    local year month day weekday numeric_date
+    local -a date_args  # Declare date_args as an array
+
+    if [ "$bsd_date" = "true" ]; then
+        date_args=(-v-8w)
+    elif [ "$gnu_date" = "true" ]; then
+        date_args=(-d '8 weeks ago')
+    else
+        echo "Unsupported date format"
+        return 1
     fi
-    # TODO: Windows for 8 weeks ago? date -d '8 weeks ago' +...
+
+    local date_output=$(date "${date_args[@]}" '+%Y %B %d %A %Y%m%d')
+    read year month day weekday numeric_date <<< "$date_output"
+
+    day=$(echo $day | sed 's/^0*//')
+    case $day in
+            1 | 21 | 31) ordinal="st" ;;
+            2 | 22)      ordinal="nd" ;;
+            3 | 23)      ordinal="rd" ;;
+            *)           ordinal="th" ;;
+    esac
+
+    echo "${numeric_date} ${weekday} the ${day}${ordinal} of ${month}.txt"
 }
+
 
 open_8_weeks_ago_less() {
     # Open morning pages from 8 weeks ago if they exist
     local review_filename="$(get_filename_8_weeks_ago)"
-    local year=$(date -v-8w +%Y)
+    local year
+
+    if [ "$bsd_date" = "true" ]; then
+        year=$(date -v-8w +%Y)
+    elif [ "$gnu_date" = "true" ]; then
+        year=$(date -d '8 weeks ago' +%Y)
+    else
+        echo "Unsupported date format"
+        return 1
+    fi
+
     if [ "$year" != "$(date +%Y)" ]; then
         review_filename="${year}/${review_filename}"
     fi
-    review_pathname="${JOURNAL_DIR}/${review_filename}"
+
+    local review_pathname="${JOURNAL_DIR}/${review_filename}"
     if [ -e "$review_pathname" ]; then
         less "$review_pathname"
     fi
@@ -187,4 +209,6 @@ if [ "$OS" = "macOS" ]; then
 elif [ "$OS" = "Windows" ]; then
     JOURNAL_DIR=~/iCloudDrive/27N4MQEA55~pro~writer/Morning\ Pages
     prepare_entry
+    #open_ia_writer_win
+    open_8_weeks_ago_less
 fi
