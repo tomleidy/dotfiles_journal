@@ -148,18 +148,23 @@ open_ia_writer_win() {
     '/c/Program Files/iA Writer/iAWriter.exe' "$morning_page_file" &
 }
 
+
+prepare_entry() {
+    set_today_file_and_path
+    fix_questions_txt
+    create_morningpages
+}
+
+
 OS=$(which_os)
 if [ "$OS" = "macOS" ]; then
     # TODO: find better place for JOURNAL_DIR determination?
     JOURNAL_DIR=~/Library/Mobile\ Documents/27N4MQEA55~pro~writer/Documents/Morning\ Pages
-    set_today_file_and_path
-    fix_questions_txt
-    create_morningpages
+    prepare_entry
     open_ia_writer_mac
     open_8_weeks_ago_less
 
 elif [ "$OS" = "Windows" ]; then
     JOURNAL_DIR=~/iCloudDrive/27N4MQEA55~pro~writer/Morning\ Pages
-    create_morningpages
-    open_ia_writer_win
+    prepare_entry
 fi
